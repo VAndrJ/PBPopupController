@@ -18,7 +18,7 @@ internal class PBPopupInteractivePresentationController: UIPercentDrivenInteract
 {
     private var isPresenting: Bool?
     
-    private var isDismissing: Bool!
+    private var isDismissing: Bool?
     
     private weak var view: UIView!
         
@@ -93,7 +93,7 @@ internal class PBPopupInteractivePresentationController: UIPercentDrivenInteract
         if self.isPresenting == false {
             if let scrollView = vc.popupContentViewController.view as? UIScrollView {
                 if scrollView.contentOffset.y <= self.contentOffset.y {
-                    if !self.isDismissing {
+                    if self.isDismissing == false {
                         self.isDismissing = true
                         self.delegate?.dismissInteractive()
                         gesture.setTranslation(.zero, in: gesture.view?.superview)
@@ -124,7 +124,7 @@ internal class PBPopupInteractivePresentationController: UIPercentDrivenInteract
             }
             
         case .changed:
-            if self.isDismissing, let scrollView = vc.popupContentViewController.view as? UIScrollView {
+            if self.isDismissing == true, let scrollView = vc.popupContentViewController.view as? UIScrollView {
                 scrollView.contentOffset = self.contentOffset
             }
             
@@ -215,7 +215,7 @@ internal class PBPopupInteractivePresentationController: UIPercentDrivenInteract
                 }
                 else {
                     self.popupController.popupStatusBarStyle = self.popupController.popupPreferredStatusBarStyle
-                    if self.isDismissing {
+                    if self.isDismissing == true {
                         animator.addAnimations {
                             vc.setNeedsStatusBarAppearanceUpdate()
                             vc.popupContentView.popupCloseButton?.setButtonStateStationary()
@@ -251,9 +251,9 @@ internal class PBPopupInteractivePresentationController: UIPercentDrivenInteract
         let isFlickDown = isFlick && (velocity.dy > 0.0)
         let isFlickUp = isFlick && (velocity.dy < 0.0)
         
-        if (self.isPresenting == true && isFlickUp) || (self.isDismissing && isFlickDown) {
+        if (self.isPresenting == true && isFlickUp) || (self.isDismissing == true && isFlickDown) {
             return .end
-        } else if (self.isPresenting == true && isFlickDown) || (self.isDismissing && isFlickUp) {
+        } else if (self.isPresenting == true && isFlickDown) || (self.isDismissing == true && isFlickUp) {
             return .start
         } else if self.animator.fractionComplete > vc.popupContentView.popupCompletionThreshold {
             return .end
