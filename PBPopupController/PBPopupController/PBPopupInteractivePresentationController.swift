@@ -8,14 +8,12 @@
 
 import UIKit
 
-protocol PBPopupInteractivePresentationDelegate : AnyObject
-{
+protocol PBPopupInteractivePresentationDelegate: AnyObject {
     func presentInteractive()
     func dismissInteractive()
 }
 
-internal class PBPopupInteractivePresentationController: UIPercentDrivenInteractiveTransition
-{
+internal class PBPopupInteractivePresentationController: UIPercentDrivenInteractiveTransition {
     private var isPresenting: Bool?
     
     private var isDismissing: Bool?
@@ -42,13 +40,11 @@ internal class PBPopupInteractivePresentationController: UIPercentDrivenInteract
     
     private weak var popupController: PBPopupController!
     
-    private var presentationController: PBPopupPresentationController!
-    {
+    private var presentationController: PBPopupPresentationController! {
         return popupController.popupPresentationController
     }
     
-    func attachToViewController(popupController: PBPopupController, withView view: UIView, presenting: Bool)
-    {
+    func attachToViewController(popupController: PBPopupController, withView view: UIView, presenting: Bool) {
         self.popupController = popupController
         self.view = view
         
@@ -65,13 +61,11 @@ internal class PBPopupInteractivePresentationController: UIPercentDrivenInteract
         self.isDismissing = false
     }
     
-    deinit
-    {
+    deinit {
         PBLog("deinit \(self)")
     }
     
-    override func startInteractiveTransition(_ transitionContext: UIViewControllerContextTransitioning)
-    {        
+    override func startInteractiveTransition(_ transitionContext: UIViewControllerContextTransitioning) {
         self.animator = self.presentationController.interruptibleAnimator(using: transitionContext) as? UIViewPropertyAnimator
         
         self.availableHeight = self.popupContainerViewAvailableHeight()
@@ -81,8 +75,7 @@ internal class PBPopupInteractivePresentationController: UIPercentDrivenInteract
         self.update(self.progress)
     }
     
-    @objc private func handlePanGesture(gesture: UIPanGestureRecognizer)
-    {
+    @objc private func handlePanGesture(gesture: UIPanGestureRecognizer) {
         guard let vc = self.popupController.containerViewController else { return }
         
         let translation = gesture.translation(in: gesture.view?.superview)
@@ -245,8 +238,7 @@ internal class PBPopupInteractivePresentationController: UIPercentDrivenInteract
         }
     }
     
-    private func completionPosition() -> UIViewAnimatingPosition
-    {
+    private func completionPosition() -> UIViewAnimatingPosition {
         guard let vc = self.popupController.containerViewController else { return .current}
         let velocity = self.gesture.velocity(in: gesture.view?.superview).vector
         let isFlick = (velocity.magnitude > vc.popupContentView.popupCompletionFlickMagnitude)
@@ -264,42 +256,35 @@ internal class PBPopupInteractivePresentationController: UIPercentDrivenInteract
         }
     }
     
-    private func popupContainerViewAvailableHeight() -> CGFloat
-    {
+    private func popupContainerViewAvailableHeight() -> CGFloat {
         let availableHeight = self.presentationController.popupContentViewFrameForPopupStateClosed(finish: true).minY - self.presentationController.popupContentViewFrameForPopupStateOpen().minY
         return self.isPresenting == true ? -availableHeight : availableHeight
     }
 }
 
-extension PBPopupInteractivePresentationController: UIGestureRecognizerDelegate
-{
-    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool
-    {
+extension PBPopupInteractivePresentationController: UIGestureRecognizerDelegate {
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         let state = self.popupController.popupPresentationState
         if state == .closed && gesture.direction == .down { return false }
         if state == .open && gesture.direction == .up { return false }
         if gesture.direction == .right || gesture.direction == .left { return false }
         
-        if self.popupController.delegate?.popupControllerPanGestureShouldBegin?(self.popupController, state: self.popupController.popupPresentationState) == false
-        {
+        if self.popupController.delegate?.popupControllerPanGestureShouldBegin?(self.popupController, state: self.popupController.popupPresentationState) == false {
             return false
         }
         
         let gesture = gestureRecognizer as! UIPanGestureRecognizer
-        if self.isPresenting == true && gesture.direction != .up
-        {
+        if self.isPresenting == true && gesture.direction != .up {
             return false
         }
         let vc = self.popupController.containerViewController
-        if self.isPresenting == false && !(vc?.popupContentViewController.view is UIScrollView) && gesture.direction != .down
-        {
+        if self.isPresenting == false && !(vc?.popupContentViewController.view is UIScrollView) && gesture.direction != .down {
             return false
         }
         return true
     }
     
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
-    {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         if NSStringFromClass(type(of: otherGestureRecognizer.view!).self).contains("DropShadow") {
             otherGestureRecognizer.state = UIGestureRecognizer.State.failed
             return true
@@ -308,10 +293,8 @@ extension PBPopupInteractivePresentationController: UIGestureRecognizerDelegate
     }
 }
 
-private extension UIPanGestureRecognizer
-{
-    enum PanDirection: Int
-    {
+private extension UIPanGestureRecognizer {
+    enum PanDirection: Int {
         case up, down, left, right
         var isVertical: Bool {
             return [.up, .down].contains(self)
@@ -321,8 +304,7 @@ private extension UIPanGestureRecognizer
         }
     }
     
-    var direction: PanDirection?
-    {
+    var direction: PanDirection? {
         let velocity = self.velocity(in: view)
         let isVertical = abs(velocity.y) > abs(velocity.x)
         
