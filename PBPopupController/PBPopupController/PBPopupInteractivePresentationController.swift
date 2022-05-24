@@ -22,7 +22,7 @@ internal class PBPopupInteractivePresentationController: UIPercentDrivenInteract
     
     private weak var view: UIView!
         
-    internal var contentOffset: CGPoint!
+    internal var contentOffset: CGPoint?
     
     internal var gesture: UIPanGestureRecognizer!
     
@@ -91,8 +91,8 @@ internal class PBPopupInteractivePresentationController: UIPercentDrivenInteract
         //print("availableHeight1: \(availableHeight)")
 
         if self.isPresenting == false {
-            if let scrollView = vc.popupContentViewController.view as? UIScrollView {
-                if scrollView.contentOffset.y <= self.contentOffset.y {
+            if let scrollView = vc.popupContentViewController.view as? UIScrollView, let contentOffset = self.contentOffset {
+                if scrollView.contentOffset.y <= contentOffset.y {
                     if self.isDismissing == false {
                         self.isDismissing = true
                         self.delegate?.dismissInteractive()
@@ -124,8 +124,8 @@ internal class PBPopupInteractivePresentationController: UIPercentDrivenInteract
             }
             
         case .changed:
-            if self.isDismissing == true, let scrollView = vc.popupContentViewController.view as? UIScrollView {
-                scrollView.contentOffset = self.contentOffset
+            if self.isDismissing == true, let scrollView = vc.popupContentViewController.view as? UIScrollView, let contentOffset = self.contentOffset {
+                scrollView.contentOffset = contentOffset
             }
             
             guard let animator = self.animator else { return }
@@ -222,7 +222,9 @@ internal class PBPopupInteractivePresentationController: UIPercentDrivenInteract
                         }
                         if let scrollView = vc.popupContentViewController.view as? UIScrollView {
                             animator.addCompletion { (_) in
-                                scrollView.contentOffset = self.contentOffset
+                                if let contentOffset = self.contentOffset {
+                                    scrollView.contentOffset = contentOffset
+                                }
                             }
                         }
                         animator.addCompletion { (_) in
