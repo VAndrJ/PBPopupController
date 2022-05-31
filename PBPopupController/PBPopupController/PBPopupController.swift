@@ -846,7 +846,7 @@ extension PBPopupPresentationStyle
         vc.view.setNeedsLayout()
         vc.view.layoutIfNeeded()
         
-        if self.popupPresentationState == .open || self.popupPresentationState == .opening || self.popupPresentationState == .presenting {
+        if [.open, .opening, .presenting].contains(self.popupPresentationState) {
             let previousState = self.popupPresentationState
             self.popupPresentationState = .closing
             self.delegate?.popupController?(self, stateChanged: self.popupPresentationState, previousState: previousState)
